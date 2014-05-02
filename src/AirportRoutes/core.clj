@@ -7,66 +7,116 @@
 (def start 0) ; city ​​from which we start
 (def end 5); city ​​to which we go
 (def max-value 999999 );max value for the distance
-(def cities
-  {
-   0 {1 4, ; [city distance]
-      2 2}
-   1 {3 5,
-       2 2}
-   2 {3 8,
-      4 10}   
-   3 {4 2, 
-      5 6}
-   4 {5 3}
-   5 {}
-   })
 
-;------------------------- attempt to read from a file  ---------------------------
-(def read-cities (reader (file "cities.txt"))); takes a pointer to a file
-(def cities-rows (line-seq read-cities)); returns a list of lines from a file
+(defn to-int [x]
+ (java.lang.Integer/parseInt x)) 
 
-;function to add a new city
-1	(defn add-new-city [city]
-2	  (with-open [read-cities (clojure.java.io/writer  "cities.txt" :append true)]
-3	    (.write read-cities (str city ";\n"))))
-
-(add-new-city "city 7")
-
-;*************************************** home initialization and  matrix NxN **************************
-(def r (atom (into [] (take n (repeat max-value)))))
-(def s (atom (into [] (take n (repeat 0)))))
-(def matrix (atom (into [] (take n (repeat @r)))))
-
-;set 0 on the main diagonal
-(loop [i 0]
-  (when (< i n)
-    (reset! matrix (assoc @matrix  i (assoc (@matrix i) i 0)))
-	    (recur (inc i))))
-;**************************************** initialization of start-city***********************************************
-(reset! r (assoc @r start 0));
-(reset! s (assoc @s start 1));visited city set value of s (0-not visited)
-
-;**************************************fill matrix with distance between cities ******************************************************    
-;(doseq [y cities] 
- ; (def i (y 0))
-  ;(doseq [y2 (into [] (cities i))]
-   ; (def j (y2 0))
-    ;(def v (y2 1))
-    ;(reset! matrix (assoc @matrix  i (assoc (@matrix i) j v)))
-    ;(reset! matrix (assoc @matrix  j (assoc (@matrix j) i v)))
-    ;(println "["i"]["j"]""="v)))
-
-(doseq [y cities] 
-  (doseq [y2 (into [] (cities (y 0)))]
-    (reset! matrix (assoc @matrix  (y 0) (assoc (@matrix (y 0)) (y2 0) (y2 1))))
-    (reset! matrix (assoc @matrix  (y2 0) (assoc (@matrix (y2 0)) (y 0) (y2 1))))))
+;********************** reading from a file and create array of cities
+(def file-with-cities (reader (file "cities.txt"))); takes a pointer to a file
+(def i (atom 0))
+(def cities-number (atom []))
+(def distance-between-cities (atom []))
+(def cities-​​names (atom []))
 
 
-;***************************************** algorithm ***************************************
+
+(defn read-file [file-with-cities] 
+  (line-seq file-with-cities))
+
+(def list-cities (read-file file-with-cities))
+
+(defn get-cities-number [contents-file]
+  (reset! cities-number (to-int (first contents-file)))); the first value in file is the number of cities
+
+;and i make array of cities and distance
+
+(defn fill-array-cities [contents-file]  
+  (doseq [row (rest contents-file)]
+    (let [array (split row #";")
+          name  (first array)
+          distance (into [](map to-int  (rest array)))]
+    (reset! distance-between-cities (assoc @distance-between-cities @i  distance)); vector with distances between cities
+    (reset! cities-​​names (assoc @cities-​​names @i  name)); vector with the names of cities
+    (reset! i (inc @i))))
+  (reset! i 0))
+
+(defn set-value-vector []  
+  (get-cities-number list-cities)
+  (fill-array-cities list-cities))
+
+;****************************************f-ja koja postavlja vektorsku reprezenataciju *******
+(set-value-vector ) ;[ime grada daljina1 daljina2 daljina3] za i-ti grad su daljine od i-tog grada do krajnjeg grada
+;**********************************************************************************************
+;*************  CREATE MATRIX  !!!!
+(defn create-matrix []
+  (def matrix-cities (atom (into [] (take @cities-number (repeat [])))))
+  (def j (atom 1))
+  (def i (atom 0))
+  
+  (doseq [row @distance-between-cities]
+    (reset! matrix-cities (assoc @matrix-cities @i (conj (@matrix-cities @i) 0)))
+    (reset! j (inc @i))
+    (doseq [distance row]
+      (reset! matrix-cities (assoc @matrix-cities @i (conj (@matrix-cities @i) distance)))
+      (reset! matrix-cities (assoc @matrix-cities @j (conj (@matrix-cities @j) distance)))
+      (reset! j (inc @j)))
+    (reset! i (inc @i))))
+
+;***********************************************f-ja koja pravi matricu*************
+(create-matrix )
+;**********************************************************************************************
+
+(defn create-vector [list-cities] ; create map {:index_city [name-of-city [connection with cities]]}
+  (reduce (fn [acc row]
+            (let [array (split row #";")
+                  name (first array)
+                  key (keyword (str "" (count acc)))
+                  distance (into [] (map to-int (rest array)))]
+              (assoc acc key (conj [name] distance))))
+            {} (rest list-cities)))
+
+ 
+(defn create-vector [list-cities] ;create map {:index_city [:name name-of-city :distance [connection with cities]]}
+  (reduce (fn [acc row]
+            (let [array (split row #";")
+                  city-name (first array)
+                  distance-between (into [] (conj (map to-int (rest array)) 0))]
+              (assoc acc (count acc)  {:index (count acc) :name city-name :distance distance-between })))
+            {} (rest list-cities)))
+
+(def map-data (create-vector list-cities))
+
+(def array (atom []))
+
+
+
+(def one-row (atom [0 0 0 0 0 0]))
+
+(defn left-triangle [index map-data]
+  (for [i (range 6)] 
+    (if (> i index)
+      (reset! one-row (assoc @one-row i ((:distance (map-data index)) (- i index)))),
+      (reset! one-row (assoc @one-row i ((:distance (map-data i)) (- index i)))))))
+
+(defn row-matrix [index map-data]
+(let [array []]
+  (for [i (range 6)] 
+    (if (> i index)
+      (conj array ((:distance (map-data index)) (- i index))),
+      (conj array ((:distance (map-data i)) (- index i)))))))
+
+;*********************** dijkstra algorithm   *********************************************
+
+(def mini 0)
+(def r (atom (into [] (take @cities-number (repeat max-value)))))
+(def s (atom (into [] (take @cities-number (repeat 0)))))
+
+
+(reset! r (assoc @r strart 0))
+(reset! s (assoc @s strart 1))
 (def tr (atom start));city in which we are currently in
 (def point (atom (into [] (take n (repeat [])))))
 
-(def mini 0)
 (loop [i 0]
   (when (and (< i (- n 1))(= (@s end) 0))
      (loop [j 0]
@@ -74,33 +124,32 @@
          (if (and (= (@s j) 0) (< (+ (@r @tr)((@matrix @tr) j)) (@r j)))
            (do
              (reset! point (assoc @point j (conj (@point j) @tr)))
-             (reset! r (assoc @r j (+ (@r @tr) ((@matrix @tr) j))))))          
+             (reset! r (assoc @r j (+ (@r @tr) ((@matrix @tr) j))))))
          (recur (inc j))))
       (def minimum max-value)
       (loop [j 0]
        (when (< j n )
-          (if (and (= (@s j) 0) (<  (@r j) minimum))
-            (do 
+          (if (and (= (@s j) 0) (< (@r j) minimum))
+            (do
               (def minimum (@r j))
               (def mini j)))
          (recur (inc j))))
      (reset! s (assoc @s mini 1))
      (reset! tr mini)
      (recur (inc i))))
+    
+(def x [11 2 33 1])
 
-;array of all cities should visit 
-(def array [])
-(defn show [city-end]
-  (if (= ((@point city-end) 0) start)
-     (do 
-       (def array (conj array (@point city-end)))
-       (reverse array)),
-    (do
-      (def array (conj array (@point city-end)))
-      (recur ((@point city-end) 0)))))
+(.indexOf x 1)
+(rest (sort [11 2 33 1]))
 
-(def z1 (atom []))
-(doseq [z  (show 5)]
-  (reset! z1 (concat @z1 z)))
+
+
+
+
+(defn najblizi-grad [])
+
+
+
 
 
