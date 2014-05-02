@@ -1,5 +1,8 @@
 (ns AirportRoutes.core)
 
+(use 'clojure.java.io)
+(use ['clojure.string :only '(split)])
+
 (def n 6); nuber of cities
 (def start 0) ; city ​​from which we start
 (def end 5); city ​​to which we go
@@ -18,6 +21,16 @@
    5 {}
    })
 
+;------------------------- attempt to read from a file  ---------------------------
+(def read-cities (reader (file "cities.txt"))); takes a pointer to a file
+(def cities-rows (line-seq read-cities)); returns a list of lines from a file
+
+;function to add a new city
+1	(defn add-new-city [city]
+2	  (with-open [read-cities (clojure.java.io/writer  "cities.txt" :append true)]
+3	    (.write read-cities (str city ";\n"))))
+
+(add-new-city "city 7")
 
 ;*************************************** home initialization and  matrix NxN **************************
 (def r (atom (into [] (take n (repeat max-value)))))
