@@ -19,7 +19,7 @@
 (defn to-int [x]
  (java.lang.Integer/parseInt x)) 
 (defn to-double [x]
- (java.lang.Double/parseDouble x))
+  (java.lang.Double/parseDouble x))
 
 
 ;**********************       READING FROM FILE     ********************
@@ -49,24 +49,24 @@
 (defn read-data [contents-file]
   (reduce (fn [acc row]
             (let [[airport-id name city country f i-la-lo-a-t d] (split row #",\"")
-                 [faa iata lantitude logitude altitude timezone dst] (split (str "\"" f ",\"" i-la-lo-a-t ",\"" d) #",")]
-                 (assoc acc (to-int airport-id)
-                  {:name (remove-last name)
-                   :city (remove-last city)
-                   :country (remove-last country)
-                   :faa faa
-                   :iata iata
-                   :lantitude (to-double lantitude)
-                   :logitude (to-double logitude)
-                   :altitude (to-int altitude)
-                   :timezone (to-double timezone)
-                   :dst dst
-                   })))
-                 {} contents-file))
+                  [faa iata lantitude logitude altitude timezone dst] (split (str "\"" f ",\"" i-la-lo-a-t ",\"" d) #",")]
+              (assoc acc (to-int airport-id)
+                     {:name (remove-last name)
+                      :city (remove-last city)
+                      :country (remove-last country)
+                      :faa faa
+                      :iata iata
+                      :lantitude (to-double lantitude)
+                      :logitude (to-double logitude)
+                      :altitude (to-int altitude)
+                      :timezone (to-double timezone)
+                      :dst dst
+                      })))
+          {} contents-file))
 
 (def data (read-data read-raw))
 
-;*******************************FUNCTION FOR CALCULATE DISTANCE ***********************
+;******************************* FUNCTION FOR CALCULATE DISTANCE ***********************
 ;dlon = lon2 - lon1
 ;dlat = lat2 - lat1
 ;a = (sin(dlat/2))^2 + cos(lat1) * cos(lat2) * (sin(dlon/2))^2
@@ -88,17 +88,75 @@
 
 ;because i can't process all airports, i must select airports which are between my start and the end
 ;        ---o--------o-------------o------- x (the end)  
-;        |     o           o          o     |       
+;        |     o           o          o     |           ---> option *
 ; (start) x-----------o-----------o----------
+
+; we have problem in this two solution :
+;             option **                       option ***
+;   (start) x===========x(end)     and      (start) x
+;                                                  ||
+;                                                  ||
+;                                                  ||
+;                                                  ||
+;                                                  x(end)   
 
 (defn airport-online [airport-1 airport-2]
   (let[f-max (max (:lantitude airport-1) (:lantitude airport-2))
        f-min (min (:lantitude airport-1) (:lantitude airport-2))
        l-max (max (:logitude  airport-1) (:logitude  airport-2))
        l-min (min (:logitude  airport-1) (:logitude  airport-2))]
-    (apply dissoc data (for [[k e] data :when (not= (and 
-                                                      (>= (:lantitude e) f-min) (<= (:lantitude e) f-max) 
-                                                      (>= (:logitude  e) l-min) (<= (:logitude e ) l-max)) true)] k))))
+    
+    (if (and 
+          (<= (/ (- l-max l-min) 2) (- f-max f-min)) 
+          (<= (/ (- f-max f-min) 2) (- l-max l-min))) ;option *
+      (apply dissoc data (for [[k e] data :when (not= (and 
+                                                        (>= (:lantitude e) f-min) (<= (:lantitude e) f-max) 
+                                                        (>= (:logitude  e) l-min) (<= (:logitude e ) l-max))
+                                                      true)] k)),
+      ;If not a normal rectangle
+      (if (> (/ (- l-max l-min) 2) (- f-max f-min)) 
+        ;OPTION **
+        (if (> (+ f-max (abs (/ (- l-max l-min) 2))) 90.00); upper limit, the case MAX
+          (apply dissoc data (for [[k e] data :when (not= (and 
+                                                            (>= (:lantitude e) (- f-min (abs (/ (- l-max l-min) 2)))) 
+                                                            (<= (:lantitude e) 90.00) 
+                                                            (>= (:logitude  e) l-min) 
+                                                            (<= (:logitude e ) l-max))
+                                                          true)] k)),
+          (if (< (- f-min (abs (/ (- l-max l-min) 2))) -90.00); lower limit, the case MIN
+            (apply dissoc data (for [[k e] data :when (not= (and 
+                                                              (>= (:lantitude e) -90.00) 
+                                                              (<= (:lantitude e)(+ f-max (abs (/ (- l-max l-min) 2)))) 
+                                                              (>= (:logitude  e) l-min) 
+                                                              (<= (:logitude e ) l-max)) 
+                                                            true)] k)),
+            (apply dissoc data (for [[k e] data :when (not= (and 
+                                                              (>= (:lantitude e) (- f-min (abs (/ (- l-max l-min) 2)))) 
+                                                              (<= (:lantitude e) (+ f-max (abs (/ (- l-max l-min) 2)))) 
+                                                              (>= (:logitude  e) l-min) 
+                                                              (<= (:logitude e ) l-max))
+                                                            true)] k)))),
+        ;OPTION ***
+        (if (> (+ l-max (abs (/ (- f-max f-min) 2))) 180.00); upper limit, the case MAX
+          (apply dissoc data (for [[k e] data :when (not= (and 
+                                                            (>= (:lantitude e) f-min) 
+                                                            (<= (:lantitude e) f-max) 
+                                                            (>= (:logitude  e) (- l-max (abs (/ (- f-max f-min) 2)))) 
+                                                            (<= (:logitude e ) 180.00))
+                                                          true)] k)),
+          (if (< (- l-min  (abs (/ (- f-max f-min) 2))) -180.00); lower limit, the case MIN
+            (apply dissoc data (for [[k e] data :when (not= (and 
+                                                              (>= (:lantitude e) f-min) 
+                                                              (<= (:lantitude e) f-max) 
+                                                              (>= (:logitude  e) -180.00)
+                                                              (<= (:logitude e ) (+ l-max (abs (/ (- f-max f-min) 2)))))
+                                                            true)] k)),
+            (apply dissoc data (for [[k e] data :when (not= (and 
+                                                              (>= (:lantitude e)  f-min) 
+                                                              (<= (:lantitude e)  f-max) 
+                                                              (>= (:logitude  e) (- l-min (abs (/ (- f-max f-min) 2)))) 
+                                                              (<= (:logitude e ) (+ l-max (abs (/ (- f-max f-min) 2)))))
+                                                            true)] k))))))))
 
 ;*************************************** calculate airports which are reachable ************************************************************
 ; if distance more than airplane range, that is unreachable
@@ -107,9 +165,9 @@
   (reduce (fn [acc [k e]]
             (let [curent-distance (calculate-distance airport e)]
               (if (< curent-distance airplane-range)
-                 (assoc acc k {:distance curent-distance}),
-                 (assoc acc k {:distance max-double}))))
-                 {} data-on-line))
+                (assoc acc k {:distance curent-distance}),
+                (assoc acc k {:distance max-double}))))
+          {} data-on-line))
 
 ;**************************************** FUNCTION WHICH ARE NEEDED FOR dijkstra algorithm ****************************************
 
@@ -127,7 +185,8 @@
             (if (= k id-airport)
               (assoc acc k  {:r 0 :s 1 :point []}),
               (assoc acc k {:r max-double :s 0 :point []})))
-            {} data-on-line))
+          {} data-on-line))
+
 ;///////////////////////////////////////////////////////////////////////////////////////
 ;this function is using for show which airports (ID of airports) we should visit
 ; it use element created by this function create-r-s-point
@@ -158,11 +217,11 @@
                    (:distance ej)) 
                  (:r (@r-s-airports kj))))
           (reset! r-s-airports (assoc @r-s-airports kj 
-                                   {:r (+ 
-                                         (:r (@r-s-airports @tr)) 
-                                         (:distance ej)) 
-                                    :s (:s (@r-s-airports kj)) 
-                                    :point (conj (:point (@r-s-airports kj)) @tr)}))))  
+                                      {:r (+ 
+                                            (:r (@r-s-airports @tr)) 
+                                            (:distance ej)) 
+                                       :s (:s (@r-s-airports kj)) 
+                                       :point (conj (:point (@r-s-airports kj)) @tr)}))))  
       
       (def minimum max-double)
       (doseq [[k v] @r-s-airports]
@@ -172,8 +231,8 @@
             (def mini k))))
       
       (reset! r-s-airports (assoc @r-s-airports mini {:r (:r (@r-s-airports mini))
-                                                :s 1 
-                                                :point (:point (@r-s-airports mini))}))
+                                                      :s 1 
+                                                      :point (:point (@r-s-airports mini))}))
       (reset! tr mini)))
   
   (def array-airports (atom []))
@@ -181,64 +240,4 @@
 
 
 (dajks-alg 1741 8157 220)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
