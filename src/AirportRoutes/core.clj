@@ -1,5 +1,16 @@
 (ns AirportRoutes.core)
 
+
+
+  (:use (compojure handler 
+                   [core :only (GET POST defroutes)]))
+  
+  (:require compojure.route 
+            [net.cgrand.enlive-html :as en]
+            [ring.util.response :as response] 
+            [ring.adapter.jetty :as jetty]
+            [clj-json.core :as json] )
+
 (use 'clojure.java.io)
 (use ['clojure.string :only '(split)])
 
