@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <meta charset="utf-8"/>
+   
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+
+
+<meta charset="ISO-8859-1"/>
+<title>Home</title>
+<script src="jquery-1.9.1.js"></script>
+<script  src="skripta.js"></script>
+ <script src="js.js"></script>
+ <script type="text/javascript">
+ 
+ 
+ </script>
+ 
+
+</head>
+<body>
+    <form method="POST" action="/shorten">
+        <input type="text" name="urlTXT"/>
+        <input type="submit" value="Shorten!" id="dugme"/>
+    </form>
+    
+    <div id="listing">
+        <ul>
+            <li>
+                <a href="/shorturl">id : url</a>
+            </li>
+        </ul>
+    </div>
+    <input type="button" value="CRTAJ" id="dugmecrtaj"/>
+     <input type="button" value="AJAX" id="pozAjax"/>
+    
+    <div id="kombobox">
+      <select style="width: 70px;">
+        <option value="proba"></option>
+      </select>
+    </div>
+    
+    <div id="map-canvas"></div>
+    
+    
+</body>
+</html>
