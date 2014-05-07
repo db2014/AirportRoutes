@@ -32,7 +32,7 @@
         #_{:status 200
            :body (with-out-str (print request))
            :headers {"Content-Type" "text/plain"}}
-        (add-to-list (-> request :params :number))
+        (add-to-list (-> request :params :name))
         (homepage request)))
 
 
