@@ -27,12 +27,12 @@
 
 
 (defroutes app*
+  (compojure.route/resources "/")
   (GET "/" request (homepage request))
-  (POST "/test" request 
-        #_{:status 200
-           :body (with-out-str (print request))
-           :headers {"Content-Type" "text/plain"}}
-        (add-to-list (-> request :params :name))
+  (POST "/testAjax" request
+        (let [p1 (-> request :params :a) 
+              p2 (-> request :params :b)]        
+          (add-to-list p1))
         (homepage request)))
 
 
