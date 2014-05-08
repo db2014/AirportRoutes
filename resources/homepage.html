@@ -4,12 +4,20 @@
 <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
     <meta charset="utf-8"/>
-
-
 <meta charset="ISO-8859-1"/>
 <title>Home</title>
+
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+
 <script src="jquery-1.9.1.js"></script>
 <script  src="skripta.js"></script>
+ <script src="js.js"></script>
 </head>
 <body>
 <h1 style="text-align: center;">AIRPORT ROUTE</h1>
@@ -38,7 +46,10 @@
             </td>
         </tr>   
     </table>
-    <div style="width: 200px;margin: 20px auto;"><input type="button" value="Show on map" id="callAjax"/></div>
-</div> 
+    <div style="width: 200px;margin: 20px auto;"><input type="button" value="Show on map" id="callAjax"/></div>  
+    
+</div>
+ 
+  <div id="map-canvas" style="width: 95%; height: 60%; margin-left: 50px; margin-left: 50px; margin-top: 100px; margin-bottom: 20px;"></div>
 </body>
 </html>

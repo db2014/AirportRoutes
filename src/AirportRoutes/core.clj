@@ -5,7 +5,7 @@
 (use ['clojure.string :only '(split)])
 
 (def r 6371); R is the radius of the Earth 6371km
-
+(def array-airports (atom []))
 (defn remove-last [x]
   (subs x 0 (- (count x) 1)))
 
@@ -236,7 +236,7 @@
                                                       :point (:point (@r-s-airports mini))}))
       (reset! tr mini)))
   
-  (def array-airports (atom []))
+
   (view-solution @r-s-airports id-airport-start id-airport-target data-on-line))
 
 
