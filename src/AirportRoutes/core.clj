@@ -236,9 +236,7 @@
                                                       :point (:point (@r-s-airports mini))}))
       (reset! tr mini)))
   
-
+  (reset! array-airports  [])
   (view-solution @r-s-airports id-airport-start id-airport-target data-on-line))
 
-
-(dajks-alg 1741 8157 220)
 

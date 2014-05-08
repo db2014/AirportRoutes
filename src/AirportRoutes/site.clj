@@ -18,9 +18,10 @@
   (reduce (fn [acc e]              
             (conj acc  (str (:logitude (airpor-data e)) "*" (:lantitude (airpor-data e)) "*"(:name (airpor-data e)))))
           [] solution))
+
 (defn data-for-combo [airpor-data]
   (reduce (fn [acc [id m]]
-            (assoc acc id (str (:name m)" " (:city m)" " (:country m))))
+            (assoc acc id (str id " " (:name m)" " (:city m)" " (:country m))))
           {0 "Select airport"} airpor-data))
 
 (def combo-data (data-for-combo airpor-data))
