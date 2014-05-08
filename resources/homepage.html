@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,22 +13,22 @@
 </head>
 <body>
 <h1 style="text-align: center;">AIRPORT ROUTE</h1>
-<div id="korisnickiIntefejs" style="margin: 0 auto; width: 70%;">
+<div id="gui" style="margin: 0 auto; width: 50%;">
     <table>
         <tr>
             <td>FROM:</td>
             <td>
-		       <div id="od">
-			      <select style="width: 320px;" id="sOD">
-			        <option value="vrednosOD"></option>
-			      </select>
-		       </div>           
+               <div id="from">
+                  <select style="width: 320px;" id="sFROM">
+                    <option value="someValue"></option>
+                  </select>
+               </div>           
             </td>
             <td>TO:</td>
             <td>
-               <div id="do">
-                  <select style="width: 320px;" id="sDO">
-                    <option value="vrednosDO"></option>
+               <div id="to">
+                  <select style="width: 320px;" id="sTO">
+                    <option value="someValue"></option>
                   </select>
                </div>           
             </td>
@@ -37,13 +38,7 @@
             </td>
         </tr>   
     </table>
-    <div style="width: 200px;margin: 0 auto;"><input type="button" value="Prikazi na mapi" id="pozAjax"/></div>
-</div>
-    <div style="margin-left: 50px;" id="rutaLista"></div>
-
-   
-   
-   
-    
+    <div style="width: 200px;margin: 20px auto;"><input type="button" value="Show on map" id="callAjax"/></div>
+</div> 
 </body>
 </html>
