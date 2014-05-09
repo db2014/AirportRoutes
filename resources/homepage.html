@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <meta charset="utf-8"/>
+<meta charset="ISO-8859-1"/>
+<title>Home</title>
+
+  <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      
+   .modal {
+    display:    none;
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 ) 
+                url('../img/ajax-loader.gif') 
+                50% 50% 
+                no-repeat;
+}
+
+/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+body.loading {
+    overflow: hidden;   
+}
+
+/* Anytime the body has the loading class, our
+   modal element will be visible */
+body.loading .modal {
+    display: block;
+}
+    </style>
+<link rel='stylesheet' type='text/css' href='select2.css' />
+
+<script src="jquery-1.9.1.js"></script>
+<script  src="skripta.js"></script>
+ <script src="js.js"></script>
+  <script src="select2.min.js"></script>
+<link rel='stylesheet' type='text/css' href='select2.css' />
+  
+
+</head>
+<body>
+<h1 style="text-align: center;">AIRPORT ROUTE</h1>
+<div id="gui" style="margin: 0 auto; width: 50%;">
+    <table>
+        <tr>
+            <td>FROM:</td>
+            <td>
+               <div id="from">
+                  <select style="width: 320px;" id="sFROM">
+                    <option value="someValue"></option>
+                  </select>
+               </div>           
+            </td>
+            <td>TO:</td>
+            <td>
+               <div id="to">
+                  <select style="width: 320px;" id="sTO">
+                    <option value="someValue"></option>
+                  </select>
+               </div>           
+            </td>
+            <td>Range of airplane(km):</td>
+            <td>
+                <input type="text" id="txtRange"/>
+            </td>
+        </tr>   
+    </table>
+    <div style="width: 200px;margin: 20px auto;"><input type="button" value="Show on map" id="callAjax"/></div>  
+    </div>
+     <div style="margin-left: 50px;" id="routeList"></div> 
+  <div id="map-canvas" style="width: 95%; height: 60%; margin-left: 50px; margin-left: 50px; margin-top: 100px; margin-bottom: 20px;"></div>
+  <div class="modal"></div>
+</body>
+</html>
