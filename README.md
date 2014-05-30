@@ -1,6 +1,7 @@
 # AirportRoutes
 
-A Clojure library designed to ... well, that part is up to you.
+This application is written in Clojure programming language, uses Ring, Compojure, Noir and Json format for 
+transfering data from the application to the web site. To show the route the aircraft used by Google Maps.
 
 ## Usage
 
